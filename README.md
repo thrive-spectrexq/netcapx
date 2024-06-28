@@ -20,6 +20,7 @@ These scripts provide GUI-based network capture tools using Python and Tkinter w
 ### Usage
 1. Install Python if not already installed.
 2. Install dependencies:
+3. pip install -r requirements.txt
 
 ### Run the script
 - python simple_network_capture_tool.py
@@ -42,6 +43,7 @@ These scripts provide GUI-based network capture tools using Python and Tkinter w
 ### Usage
 1. Install Python if not already installed.
 2. Install dependencies:
+3. pip install -r requirements.txt
 
 ### Run the script
 - python advanced_nct.py
