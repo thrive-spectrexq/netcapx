@@ -11,7 +11,7 @@ netcapx provides GUI-based network capturing tool using Python and Tkinter with 
 2. Run tha application:
    
    ```bash
-   python advanced_nct.py
+   python3 netcapx.py
    ```
 
 ## License
