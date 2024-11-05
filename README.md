@@ -2,11 +2,6 @@
 
 netcapx provides GUI-based network capturing tool using Python and Tkinter with Scapy for packet sniffing.
 
-### Dependencies
-- Python (3.11+ recommended)
-- tkinter
-- scapy
-
 ### Usage
 1. Install dependencies:
 
