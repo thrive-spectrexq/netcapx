@@ -7,7 +7,7 @@ import threading
 class NetworkCaptureApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Network Capture Tool")
+        self.root.title("netcapx")
 
         # Frame to hold the controls
         control_frame = ttk.Frame(root, padding="15")
