@@ -1,0 +1,26 @@
+# Node modules
+node_modules
+
+# Dependency and build files
+package-lock.json
+yarn.lock
+
+# Build output directories
+dist/
+output/
+build/
+
+# TypeScript cache and output
+*.tsbuildinfo
+
+# Electron packaging output
+out/
+release/
+
+# OS and editor-specific files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
