@@ -1,6 +1,6 @@
 # netcapx
 
-netcapx is a network capturing tool that provides a GUI for capturing network packets and saving the captured data. This project consists of two main parts:
+netcapx is a network capturing tool that provides a GUI for capturing network packets.
 
 ## Backend Setup
 
