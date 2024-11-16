@@ -1,5 +1,6 @@
 import axios from "axios";
-import { CSSProperties, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import "./App.css"; // Import the CSS file
 
 function App() {
   const [status, setStatus] = useState("Stopped");
@@ -83,25 +84,39 @@ function App() {
   };
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.header}>Netcapx - Packet Capture</h1>
-      <p style={styles.status}>Status: <strong>{status}</strong></p>
-      <div style={styles.buttonContainer}>
-        <button style={styles.button} onClick={startCapture}>Start Capture</button>
-        <button style={styles.button} onClick={stopCapture}>Stop Capture</button>
-        <button style={styles.button} onClick={getSummary}>Get Summary</button>
-        <button style={styles.button} onClick={saveCapture}>Save Capture</button>
-        <button style={styles.button} onClick={loadCapture}>Load Capture</button>
-        <button style={styles.button} onClick={resetCapture}>Reset Capture</button>
+    <div className="container">
+      <h1 className="header">Netcapx - Packet Capture</h1>
+      <p className="status">
+        Status: <strong>{status}</strong>
+      </p>
+      <div className="button-container">
+        <button className="button" onClick={startCapture}>
+          Start Capture
+        </button>
+        <button className="button" onClick={stopCapture}>
+          Stop Capture
+        </button>
+        <button className="button" onClick={getSummary}>
+          Get Summary
+        </button>
+        <button className="button" onClick={saveCapture}>
+          Save Capture
+        </button>
+        <button className="button" onClick={loadCapture}>
+          Load Capture
+        </button>
+        <button className="button" onClick={resetCapture}>
+          Reset Capture
+        </button>
       </div>
 
-      <div style={styles.messageBox}>
-        <h2 style={styles.sectionHeader}>Message</h2>
+      <div className="message-box">
+        <h2 className="section-header">Message</h2>
         <p>{message}</p>
       </div>
 
-      <div style={styles.summaryBox}>
-        <h2 style={styles.sectionHeader}>Capture Summary</h2>
+      <div className="summary-box">
+        <h2 className="section-header">Capture Summary</h2>
         <ul>
           {summary.length > 0 ? (
             summary.map((item, index) => <li key={index}>{item}</li>)
@@ -115,70 +130,3 @@ function App() {
 }
 
 export default App;
-
-// Define the styles with the CSSProperties type
-const styles: { 
-  container: CSSProperties,
-  header: CSSProperties,
-  status: CSSProperties,
-  buttonContainer: CSSProperties,
-  button: CSSProperties,
-  messageBox: CSSProperties,
-  summaryBox: CSSProperties,
-  sectionHeader: CSSProperties
-} = {
-  container: {
-    fontFamily: "Arial, sans-serif",
-    maxWidth: "600px",
-    margin: "0 auto",
-    padding: "20px",
-    backgroundColor: "#f0f4f8",
-    borderRadius: "8px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-  },
-  header: {
-    color: "#333",
-    textAlign: "center",
-    fontSize: "24px",
-  },
-  status: {
-    textAlign: "center",
-    fontSize: "18px",
-    margin: "10px 0",
-    color: "#444",
-  },
-  buttonContainer: {
-    display: "flex",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: "10px",
-    marginBottom: "20px",
-  },
-  button: {
-    padding: "10px 20px",
-    fontSize: "14px",
-    color: "#fff",
-    backgroundColor: "#007bff",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-  },
-  messageBox: {
-    marginBottom: "20px",
-    padding: "10px",
-    backgroundColor: "#e0e8f0",
-    borderRadius: "4px",
-    color: "#555",
-  },
-  summaryBox: {
-    padding: "10px",
-    backgroundColor: "#f9f9f9",
-    borderRadius: "4px",
-    color: "#444",
-  },
-  sectionHeader: {
-    fontSize: "18px",
-    color: "#333",
-    marginBottom: "10px",
-  },
-};

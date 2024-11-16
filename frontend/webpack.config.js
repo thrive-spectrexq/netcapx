@@ -23,6 +23,11 @@ module.exports = {
                 use: 'ts-loader',
                 exclude: /node_modules/,
             },
+            {
+                test: /\.css$/, // Rule for CSS files
+                use: ['style-loader', 'css-loader'], // Process CSS with loaders
+                exclude: /node_modules/,
+            },
         ],
     },
     plugins: [

@@ -1,0 +1,93 @@
+/* General Container */
+.container {
+    font-family: "Arial", sans-serif;
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Header */
+  .header {
+    color: #333;
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 20px;
+  }
+  
+  /* Status */
+  .status {
+    text-align: center;
+    font-size: 18px;
+    margin: 10px 0;
+    color: #555;
+  }
+  
+  /* Button Container */
+  .button-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  /* Buttons */
+  .button {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Message Box */
+  .message-box {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #e0f7fa;
+    border-radius: 4px;
+    color: #333;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Summary Box */
+  .summary-box {
+    padding: 15px;
+    background-color: #fef9e7;
+    border-radius: 4px;
+    color: #444;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Section Header */
+  .section-header {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  /* List */
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  ul li {
+    background-color: #fff;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
