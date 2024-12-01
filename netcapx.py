@@ -5,7 +5,7 @@ from collections import deque
 from tkinter import filedialog, ttk
 
 from scapy.all import (
-    DNS, IP, TCP, UDP, Ether, ICMP, IPv6, raw, sniff, wrpcap
+    DNS, IP, TCP, UDP, Ether, ICMP, IPv6, raw, sniff, wrpcap, get_if_list
 )
 
 # Global variables
