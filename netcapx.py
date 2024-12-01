@@ -1,12 +1,13 @@
 import os
 import threading
 import tkinter as tk
+from collections import deque
 from tkinter import filedialog, ttk
 
-from scapy.all import DNS, IP, TCP, UDP, sniff, wrpcap
+from scapy.all import DNS, IP, TCP, UDP, Ether, get_if_list, raw, sniff, wrpcap
 
 # Global variables
-packet_data = []
+packet_data = deque(maxlen=1000)  # Store up to 1000 packets
 filtered_data = []
 stop_event = threading.Event()
 
@@ -26,25 +27,33 @@ def capture_packets(interface, stop_event):
             dst = packet[IP].dst if IP in packet else "Unknown"
             length = len(packet)
             info = packet.summary()
-            packet_data.append((proto, src, dst, length, info))
-            update_table(proto, src, dst, length, info)
-        except Exception:
-            pass  # Handle packet parsing errors
+            packet_data.append(packet)
+            update_table_safe(proto, src, dst, length, info)
+        except Exception as e:
+            print(f"Error processing packet: {e}")
 
     sniff(
-        iface=interface, prn=process_packet, stop_filter=lambda x: stop_event.is_set()
+        iface=interface,
+        prn=process_packet,
+        stop_filter=lambda x: stop_event.is_set(),
+        store=0,
     )
 
 
-# Function to update the table
-def update_table(proto, src, dst, length, info):
-    tree.insert("", "end", values=(proto, src, dst, length, info))
+# Thread-safe function to update the table
+def update_table_safe(proto, src, dst, length, info):
+    root.after(
+        0, lambda: tree.insert("", "end", values=(proto, src, dst, length, info))
+    )
 
 
 # Function to start capturing packets
 def start_capture():
     stop_event.clear()
     interface = interface_var.get()
+    if interface not in available_interfaces:
+        status_label.config(text="Status: Invalid Interface")
+        return
     threading.Thread(
         target=capture_packets, args=(interface, stop_event), daemon=True
     ).start()
@@ -59,9 +68,9 @@ def stop_capture():
 
 # Function to clear the table
 def clear_table():
-    for item in tree.get_children():
-        tree.delete(item)
+    tree.delete(*tree.get_children())
     packet_data.clear()
+    status_label.config(text="Status: Table Cleared")
 
 
 # Function to apply filters
@@ -69,7 +78,16 @@ def apply_filters():
     filter_protocol = protocol_filter_var.get()
     tree.delete(*tree.get_children())  # Clear table
     filtered_data.clear()
-    for proto, src, dst, length, info in packet_data:
+    for packet in packet_data:
+        proto = (
+            "TCP"
+            if TCP in packet
+            else "UDP" if UDP in packet else "DNS" if DNS in packet else "Other"
+        )
+        src = packet[IP].src if IP in packet else "Unknown"
+        dst = packet[IP].dst if IP in packet else "Unknown"
+        length = len(packet)
+        info = packet.summary()
         if filter_protocol == "All" or proto == filter_protocol:
             filtered_data.append((proto, src, dst, length, info))
             tree.insert("", "end", values=(proto, src, dst, length, info))
@@ -81,9 +99,11 @@ def export_to_pcap():
         defaultextension=".pcap", filetypes=[("PCAP files", "*.pcap")]
     )
     if file_path:
-        pkts = [pkt for pkt in packet_data]
-        wrpcap(file_path, pkts)
-        status_label.config(text=f"Data exported to {file_path}")
+        try:
+            wrpcap(file_path, packet_data)
+            status_label.config(text=f"Data exported to {file_path}")
+        except Exception as e:
+            status_label.config(text=f"Error exporting data: {e}")
 
 
 # Create main GUI window
@@ -92,9 +112,12 @@ root.title("NetCapX - Enhanced Network Capture Tool")
 
 # Interface selection
 tk.Label(root, text="Select Interface:").pack(pady=5)
-interface_var = tk.StringVar(value="eth0")  # Default interface
-interface_entry = tk.Entry(root, textvariable=interface_var)
-interface_entry.pack(pady=5)
+interface_var = tk.StringVar()
+available_interfaces = get_if_list()
+interface_menu = ttk.Combobox(
+    root, textvariable=interface_var, values=available_interfaces
+)
+interface_menu.pack(pady=5)
 
 # Protocol filter
 tk.Label(root, text="Filter by Protocol:").pack(pady=5)
@@ -133,6 +156,11 @@ for col in columns:
     tree.heading(col, text=col)
     tree.column(col, width=150)
 tree.pack(pady=10, fill=tk.BOTH, expand=True)
+
+# Enhance Treeview appearance
+style = ttk.Style()
+style.configure("Treeview", font=("Arial", 10))
+style.configure("Treeview.Heading", font=("Arial", 12, "bold"))
 
 # Run the GUI loop
 root.mainloop()
