@@ -7,7 +7,7 @@ netcapx is a network capturing tool that provides a GUI for capturing network pa
 1. Clone the repository:
 
    ```bash
-   https://github.com/thrive-spectrexq/netcapx.git
+   git clone https://github.com/thrive-spectrexq/netcapx.git
    ```
 
 2. Create a virtual environment:
