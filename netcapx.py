@@ -4,13 +4,37 @@ import tkinter as tk
 from collections import deque
 from tkinter import filedialog, ttk
 
-from scapy.all import DNS, IP, TCP, UDP, Ether, get_if_list, raw, sniff, wrpcap
+from scapy.all import (
+    DNS, IP, TCP, UDP, Ether, ICMP, IPv6, raw, sniff, wrpcap
+)
 
 # Global variables
 packet_data = deque(maxlen=1000)  # Store up to 1000 packets
 filtered_data = []
 stop_event = threading.Event()
 
+# Protocol mapping
+PROTOCOLS = {
+    0: "IP",
+    1: "ICMP",
+    3: "GGP",
+    6: "TCP",
+    8: "EGP",
+    12: "PUP",
+    17: "UDP",
+    20: "HMP",
+    22: "XNS-IDP",
+    27: "RDP",
+    41: "IPv6",
+    43: "IPv6-Route",
+    44: "IPv6-Frag",
+    50: "ESP",
+    51: "AH",
+    58: "IPv6-ICMP",
+    59: "IPv6-NoNxt",
+    60: "IPv6-Opts",
+    66: "RVD",
+}
 
 # Function to capture packets
 def capture_packets(interface, stop_event):
@@ -18,11 +42,7 @@ def capture_packets(interface, stop_event):
         if stop_event.is_set():
             return
         try:
-            proto = (
-                "TCP"
-                if TCP in packet
-                else "UDP" if UDP in packet else "DNS" if DNS in packet else "Other"
-            )
+            proto = PROTOCOLS.get(packet[IP].proto, "Other") if IP in packet else "Other"
             src = packet[IP].src if IP in packet else "Unknown"
             dst = packet[IP].dst if IP in packet else "Unknown"
             length = len(packet)
@@ -39,13 +59,30 @@ def capture_packets(interface, stop_event):
         store=0,
     )
 
-
 # Thread-safe function to update the table
 def update_table_safe(proto, src, dst, length, info):
     root.after(
         0, lambda: tree.insert("", "end", values=(proto, src, dst, length, info))
     )
 
+# Function to display packet details
+def show_packet_details(event):
+    selected_item = tree.selection()
+    if not selected_item:
+        return
+    packet_index = tree.index(selected_item[0])
+    packet = packet_data[packet_index]
+
+    details_window = tk.Toplevel(root)
+    details_window.title("Packet Details")
+    details_window.geometry("600x400")
+
+    raw_data = raw(packet).hex()
+    details_text = tk.Text(details_window, wrap="word")
+    details_text.insert("1.0", f"Packet Details:\n\n{packet.show(dump=True)}")
+    details_text.insert("end", f"\n\nRaw Data:\n\n{raw_data}")
+    details_text.configure(state="disabled")
+    details_text.pack(expand=True, fill="both")
 
 # Function to start capturing packets
 def start_capture():
@@ -59,12 +96,10 @@ def start_capture():
     ).start()
     status_label.config(text=f"Status: Capturing on {interface}")
 
-
 # Function to stop capturing packets
 def stop_capture():
     stop_event.set()
     status_label.config(text="Status: Stopped")
-
 
 # Function to clear the table
 def clear_table():
@@ -72,18 +107,13 @@ def clear_table():
     packet_data.clear()
     status_label.config(text="Status: Table Cleared")
 
-
 # Function to apply filters
 def apply_filters():
     filter_protocol = protocol_filter_var.get()
     tree.delete(*tree.get_children())  # Clear table
     filtered_data.clear()
     for packet in packet_data:
-        proto = (
-            "TCP"
-            if TCP in packet
-            else "UDP" if UDP in packet else "DNS" if DNS in packet else "Other"
-        )
+        proto = PROTOCOLS.get(packet[IP].proto, "Other") if IP in packet else "Other"
         src = packet[IP].src if IP in packet else "Unknown"
         dst = packet[IP].dst if IP in packet else "Unknown"
         length = len(packet)
@@ -91,7 +121,6 @@ def apply_filters():
         if filter_protocol == "All" or proto == filter_protocol:
             filtered_data.append((proto, src, dst, length, info))
             tree.insert("", "end", values=(proto, src, dst, length, info))
-
 
 # Function to export captured data to a PCAP file
 def export_to_pcap():
@@ -104,7 +133,6 @@ def export_to_pcap():
             status_label.config(text=f"Data exported to {file_path}")
         except Exception as e:
             status_label.config(text=f"Error exporting data: {e}")
-
 
 # Create main GUI window
 root = tk.Tk()
@@ -123,7 +151,7 @@ interface_menu.pack(pady=5)
 tk.Label(root, text="Filter by Protocol:").pack(pady=5)
 protocol_filter_var = tk.StringVar(value="All")
 protocol_filter_menu = ttk.Combobox(
-    root, textvariable=protocol_filter_var, values=["All", "TCP", "UDP", "DNS"]
+    root, textvariable=protocol_filter_var, values=["All"] + list(PROTOCOLS.values())
 )
 protocol_filter_menu.pack(pady=5)
 apply_filter_button = tk.Button(root, text="Apply Filter", command=apply_filters)
@@ -156,6 +184,8 @@ for col in columns:
     tree.heading(col, text=col)
     tree.column(col, width=150)
 tree.pack(pady=10, fill=tk.BOTH, expand=True)
+
+tree.bind("<Double-1>", show_packet_details)  # Bind double-click event
 
 # Enhance Treeview appearance
 style = ttk.Style()
