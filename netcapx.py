@@ -3,7 +3,6 @@ import threading
 import tkinter as tk
 from collections import deque
 from tkinter import filedialog, ttk
-
 from scapy.all import (
     DNS, IP, TCP, UDP, Ether, ICMP, IPv6, raw, sniff, wrpcap, get_if_list
 )
@@ -12,6 +11,7 @@ from scapy.all import (
 packet_data = deque(maxlen=1000)  # Store up to 1000 packets
 filtered_data = []
 stop_event = threading.Event()
+dark_mode = False  # Track the current theme mode
 
 # Protocol mapping
 PROTOCOLS = {
@@ -35,6 +35,45 @@ PROTOCOLS = {
     60: "IPv6-Opts",
     66: "RVD",
 }
+
+# Toggle Dark Mode
+def toggle_dark_mode():
+    global dark_mode
+    dark_mode = not dark_mode
+    apply_theme()
+
+def apply_theme():
+    style = ttk.Style()
+    if dark_mode:
+        # Dark mode colors
+        bg_color = "#2E2E2E"
+        fg_color = "#FFFFFF"
+        tree_bg = "#333333"
+        tree_fg = "#FFFFFF"
+        tree_sel = "#4D4D4D"
+
+        style.configure("TButton", background=bg_color, foreground=fg_color)
+        style.configure("TLabel", background=bg_color, foreground=fg_color)
+        style.configure("TCombobox", fieldbackground=bg_color, foreground=fg_color)
+        style.configure("Treeview", background=tree_bg, foreground=tree_fg, fieldbackground=tree_bg)
+        style.configure("Treeview.Heading", background=bg_color, foreground=fg_color)
+        root.configure(bg=bg_color)
+        status_label.config(bg=bg_color, fg=fg_color)
+    else:
+        # Light mode colors
+        bg_color = "#FFFFFF"
+        fg_color = "#000000"
+        tree_bg = "#FFFFFF"
+        tree_fg = "#000000"
+        tree_sel = "#D9D9D9"
+
+        style.configure("TButton", background=bg_color, foreground=fg_color)
+        style.configure("TLabel", background=bg_color, foreground=fg_color)
+        style.configure("TCombobox", fieldbackground=bg_color, foreground=fg_color)
+        style.configure("Treeview", background=tree_bg, foreground=tree_fg, fieldbackground=tree_bg)
+        style.configure("Treeview.Heading", background=bg_color, foreground=fg_color)
+        root.configure(bg=bg_color)
+        status_label.config(bg=bg_color, fg=fg_color)
 
 # Function to capture packets
 def capture_packets(interface, stop_event):
@@ -151,6 +190,10 @@ def export_to_pcap():
 root = tk.Tk()
 root.title("NetCapX - Enhanced Network Capture Tool")
 
+# Add a toggle button for Dark Mode
+theme_button = tk.Button(root, text="Toggle Dark Mode", command=toggle_dark_mode)
+theme_button.pack(pady=5)
+
 # Interface selection
 tk.Label(root, text="Select Interface:").pack(pady=5)
 interface_var = tk.StringVar()
@@ -204,6 +247,9 @@ tree.bind("<Double-1>", show_packet_details)  # Bind double-click event
 style = ttk.Style()
 style.configure("Treeview", font=("Arial", 10))
 style.configure("Treeview.Heading", font=("Arial", 12, "bold"))
+
+# Apply default theme (Light Mode)
+apply_theme()
 
 # Run the GUI loop
 root.mainloop()
