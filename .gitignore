@@ -1,4 +1,5 @@
 .venv
+.exe
 build
 dist
 netcapx.spec
