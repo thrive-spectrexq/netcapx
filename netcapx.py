@@ -52,12 +52,15 @@ def capture_packets(interface, stop_event):
         except Exception as e:
             print(f"Error processing packet: {e}")
 
-    sniff(
-        iface=interface,
-        prn=process_packet,
-        stop_filter=lambda x: stop_event.is_set(),
-        store=0,
-    )
+    try:
+        sniff(
+            iface=interface,
+            prn=process_packet,
+            stop_filter=lambda x: stop_event.is_set(),
+            store=0,
+        )
+    except Exception as e:
+        print(f"Error starting capture: {e}")
 
 # Thread-safe function to update the table
 def update_table_safe(proto, src, dst, length, info):
@@ -80,6 +83,13 @@ def show_packet_details(event):
     raw_data = raw(packet).hex()
     details_text = tk.Text(details_window, wrap="word")
     details_text.insert("1.0", f"Packet Details:\n\n{packet.show(dump=True)}")
+    
+    # Detailed protocol-specific analysis
+    if DNS in packet:
+        details_text.insert("end", f"\n\nDNS Query/Response Details:\n{packet[DNS].summary()}")
+    if TCP in packet:
+        details_text.insert("end", f"\n\nTCP Stream Information:\n{packet[TCP].summary()}")
+
     details_text.insert("end", f"\n\nRaw Data:\n\n{raw_data}")
     details_text.configure(state="disabled")
     details_text.pack(expand=True, fill="both")
@@ -113,14 +123,17 @@ def apply_filters():
     tree.delete(*tree.get_children())  # Clear table
     filtered_data.clear()
     for packet in packet_data:
-        proto = PROTOCOLS.get(packet[IP].proto, "Other") if IP in packet else "Other"
-        src = packet[IP].src if IP in packet else "Unknown"
-        dst = packet[IP].dst if IP in packet else "Unknown"
-        length = len(packet)
-        info = packet.summary()
-        if filter_protocol == "All" or proto == filter_protocol:
-            filtered_data.append((proto, src, dst, length, info))
-            tree.insert("", "end", values=(proto, src, dst, length, info))
+        try:
+            proto = PROTOCOLS.get(packet[IP].proto, "Other") if IP in packet else "Other"
+            src = packet[IP].src if IP in packet else "Unknown"
+            dst = packet[IP].dst if IP in packet else "Unknown"
+            length = len(packet)
+            info = packet.summary()
+            if filter_protocol == "All" or proto == filter_protocol:
+                filtered_data.append((proto, src, dst, length, info))
+                tree.insert("", "end", values=(proto, src, dst, length, info))
+        except Exception as e:
+            print(f"Error applying filter: {e}")
 
 # Function to export captured data to a PCAP file
 def export_to_pcap():
