@@ -3,8 +3,19 @@ import threading
 import tkinter as tk
 from collections import deque
 from tkinter import filedialog, ttk
+
 from scapy.all import (
-    DNS, IP, TCP, UDP, Ether, ICMP, IPv6, raw, sniff, wrpcap, get_if_list
+    DNS,
+    ICMP,
+    IP,
+    TCP,
+    UDP,
+    Ether,
+    IPv6,
+    get_if_list,
+    raw,
+    sniff,
+    wrpcap,
 )
 
 # Global variables
@@ -36,11 +47,13 @@ PROTOCOLS = {
     66: "RVD",
 }
 
+
 # Toggle Dark Mode
 def toggle_dark_mode():
     global dark_mode
     dark_mode = not dark_mode
     apply_theme()
+
 
 def apply_theme():
     style = ttk.Style()
@@ -55,7 +68,9 @@ def apply_theme():
         style.configure("TButton", background=bg_color, foreground=fg_color)
         style.configure("TLabel", background=bg_color, foreground=fg_color)
         style.configure("TCombobox", fieldbackground=bg_color, foreground=fg_color)
-        style.configure("Treeview", background=tree_bg, foreground=tree_fg, fieldbackground=tree_bg)
+        style.configure(
+            "Treeview", background=tree_bg, foreground=tree_fg, fieldbackground=tree_bg
+        )
         style.configure("Treeview.Heading", background=bg_color, foreground=fg_color)
         root.configure(bg=bg_color)
         status_label.config(bg=bg_color, fg=fg_color)
@@ -70,10 +85,13 @@ def apply_theme():
         style.configure("TButton", background=bg_color, foreground=fg_color)
         style.configure("TLabel", background=bg_color, foreground=fg_color)
         style.configure("TCombobox", fieldbackground=bg_color, foreground=fg_color)
-        style.configure("Treeview", background=tree_bg, foreground=tree_fg, fieldbackground=tree_bg)
+        style.configure(
+            "Treeview", background=tree_bg, foreground=tree_fg, fieldbackground=tree_bg
+        )
         style.configure("Treeview.Heading", background=bg_color, foreground=fg_color)
         root.configure(bg=bg_color)
         status_label.config(bg=bg_color, fg=fg_color)
+
 
 # Function to capture packets
 def capture_packets(interface, stop_event):
@@ -81,7 +99,9 @@ def capture_packets(interface, stop_event):
         if stop_event.is_set():
             return
         try:
-            proto = PROTOCOLS.get(packet[IP].proto, "Other") if IP in packet else "Other"
+            proto = (
+                PROTOCOLS.get(packet[IP].proto, "Other") if IP in packet else "Other"
+            )
             src = packet[IP].src if IP in packet else "Unknown"
             dst = packet[IP].dst if IP in packet else "Unknown"
             length = len(packet)
@@ -101,11 +121,13 @@ def capture_packets(interface, stop_event):
     except Exception as e:
         print(f"Error starting capture: {e}")
 
+
 # Thread-safe function to update the table
 def update_table_safe(proto, src, dst, length, info):
     root.after(
         0, lambda: tree.insert("", "end", values=(proto, src, dst, length, info))
     )
+
 
 # Function to display packet details
 def show_packet_details(event):
@@ -122,16 +144,21 @@ def show_packet_details(event):
     raw_data = raw(packet).hex()
     details_text = tk.Text(details_window, wrap="word")
     details_text.insert("1.0", f"Packet Details:\n\n{packet.show(dump=True)}")
-    
+
     # Detailed protocol-specific analysis
     if DNS in packet:
-        details_text.insert("end", f"\n\nDNS Query/Response Details:\n{packet[DNS].summary()}")
+        details_text.insert(
+            "end", f"\n\nDNS Query/Response Details:\n{packet[DNS].summary()}"
+        )
     if TCP in packet:
-        details_text.insert("end", f"\n\nTCP Stream Information:\n{packet[TCP].summary()}")
+        details_text.insert(
+            "end", f"\n\nTCP Stream Information:\n{packet[TCP].summary()}"
+        )
 
     details_text.insert("end", f"\n\nRaw Data:\n\n{raw_data}")
     details_text.configure(state="disabled")
     details_text.pack(expand=True, fill="both")
+
 
 # Function to start capturing packets
 def start_capture():
@@ -145,16 +172,19 @@ def start_capture():
     ).start()
     status_label.config(text=f"Status: Capturing on {interface}")
 
+
 # Function to stop capturing packets
 def stop_capture():
     stop_event.set()
     status_label.config(text="Status: Stopped")
+
 
 # Function to clear the table
 def clear_table():
     tree.delete(*tree.get_children())
     packet_data.clear()
     status_label.config(text="Status: Table Cleared")
+
 
 # Function to apply filters
 def apply_filters():
@@ -163,7 +193,9 @@ def apply_filters():
     filtered_data.clear()
     for packet in packet_data:
         try:
-            proto = PROTOCOLS.get(packet[IP].proto, "Other") if IP in packet else "Other"
+            proto = (
+                PROTOCOLS.get(packet[IP].proto, "Other") if IP in packet else "Other"
+            )
             src = packet[IP].src if IP in packet else "Unknown"
             dst = packet[IP].dst if IP in packet else "Unknown"
             length = len(packet)
@@ -173,6 +205,7 @@ def apply_filters():
                 tree.insert("", "end", values=(proto, src, dst, length, info))
         except Exception as e:
             print(f"Error applying filter: {e}")
+
 
 # Function to export captured data to a PCAP file
 def export_to_pcap():
@@ -185,6 +218,7 @@ def export_to_pcap():
             status_label.config(text=f"Data exported to {file_path}")
         except Exception as e:
             status_label.config(text=f"Error exporting data: {e}")
+
 
 # Create main GUI window
 root = tk.Tk()

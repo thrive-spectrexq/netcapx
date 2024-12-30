@@ -3,3 +3,6 @@
 build
 dist
 netcapx.spec
+netcapx.log
+__pycache__
+*.pyc
